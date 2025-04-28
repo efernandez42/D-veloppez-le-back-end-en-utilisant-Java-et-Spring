@@ -1,7 +1,6 @@
 package com.rental.service;
 
 import com.rental.model.Rental;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 

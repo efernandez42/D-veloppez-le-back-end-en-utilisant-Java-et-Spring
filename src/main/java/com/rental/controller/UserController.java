@@ -2,45 +2,40 @@ package com.rental.controller;
 
 import com.rental.model.User;
 import com.rental.service.UserService;
+import com.rental.dto.LoginRequest;
+import com.rental.dto.RegisterRequest;
+import com.rental.dto.UserResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Optional;
-
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/api/auth")
 public class UserController {
 
-    private final UserService userService;
-
     @Autowired
-    public UserController(UserService userService) {
-        this.userService = userService;
+    private UserService userService;
+
+    // Route pour l'inscription
+    @PostMapping("/register")
+    public ResponseEntity<UserResponse> register(@RequestBody RegisterRequest registerRequest) {
+        User user = userService.register(registerRequest);
+        String token = userService.generateJwtToken(user);
+        return ResponseEntity.ok(new UserResponse(user, token));
     }
 
-    @GetMapping
-    public List<User> getAllUsers() {
-        return userService.getAllUsers();
+    // Route pour la connexion
+    @PostMapping("/login")
+    public ResponseEntity<UserResponse> login(@RequestBody LoginRequest loginRequest) {
+        User user = userService.login(loginRequest);
+        String token = userService.generateJwtToken(user);
+        return ResponseEntity.ok(new UserResponse(user, token));
     }
 
-    @GetMapping("/{id}")
-    public Optional<User> getUserById(@PathVariable Long id) {
-        return userService.getUserById(id);
-    }
-
-    @PostMapping
-    public User createUser(@RequestBody User user) {
-        return userService.createUser(user);
-    }
-
-    @PutMapping("/{id}")
-    public User updateUser(@PathVariable Long id, @RequestBody User user) {
-        return userService.updateUser(id, user);
-    }
-
-    @DeleteMapping("/{id}")
-    public void deleteUser(@PathVariable Long id) {
-        userService.deleteUser(id);
+    // Route pour obtenir l'utilisateur connecté
+    @GetMapping("/me")
+    public ResponseEntity<UserResponse> me(@RequestHeader("Authorization") String token) {
+        User user = userService.getUserFromToken(token);
+        return ResponseEntity.ok(new UserResponse(user, token));
     }
 }

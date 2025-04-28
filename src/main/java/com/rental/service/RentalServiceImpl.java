@@ -24,9 +24,9 @@ public class RentalServiceImpl implements RentalService {
         for (Rental rental : rentals) {
             String fullImageUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
                     .path("/" + UPLOAD_DIR)
-                    .path(rental.getPicture())  // Ici on utilise getPicture() du Rental
+                    .path(rental.getPicture())
                     .toUriString();
-            rental.setPicture(fullImageUrl);  // On remplace le "nom" par l'URL complet
+            rental.setPicture(fullImageUrl);
         }
 
         return rentals;
