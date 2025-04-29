@@ -2,9 +2,11 @@ package com.rental.controller;
 
 import com.rental.dto.RentalRequest;
 import com.rental.model.Rental;
+import com.rental.model.User;
 import com.rental.repository.RentalRepository;
 import com.rental.service.RentalService;
 import com.rental.service.RentalServiceImpl;
+import com.rental.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -21,6 +24,9 @@ import java.util.UUID;
 public class RentalController {
 
     private static final String UPLOAD_DIR = "src/main/resources/public/uploads/";
+
+    @Autowired
+    private UserService userService;
 
     @Autowired
     private RentalServiceImpl rentalServiceImpl;
@@ -36,7 +42,7 @@ public class RentalController {
     }
 
     @PostMapping(consumes = "multipart/form-data")
-    public ResponseEntity<Rental> createRental(@ModelAttribute RentalRequest rentalRequest) {
+    public Map<String, String> createRental(@RequestHeader("Authorization") String token, @ModelAttribute RentalRequest rentalRequest) {
         try {
             MultipartFile file = rentalRequest.getPicture();
             String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
@@ -48,20 +54,23 @@ public class RentalController {
 
             file.transferTo(Paths.get(UPLOAD_DIR + fileName));
 
+            String cleanToken = token.replace("Bearer ", "");
+            User user = userService.getUserFromToken(cleanToken);
+
             Rental rental = new Rental();
             rental.setName(rentalRequest.getName());
             rental.setSurface(rentalRequest.getSurface());
             rental.setPrice(rentalRequest.getPrice());
             rental.setPicture(fileName);
             rental.setDescription(rentalRequest.getDescription());
-            rental.setOwnerId(1L);
+            rental.setOwnerId(user.getId());
 
             Rental savedRental = rentalServiceImpl.saveRental(rental);
 
-            return ResponseEntity.ok(savedRental);
+            return Map.of("message", "Rental created !");
 
         } catch (IOException e) {
-            return ResponseEntity.internalServerError().build();
+            return Map.of("error", ResponseEntity.internalServerError().build().toString()) ;
         }
     }
 }

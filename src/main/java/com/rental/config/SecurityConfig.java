@@ -33,9 +33,8 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/api/auth/login", "/api/auth/register"
+                        .requestMatchers( "/api/auth/login", "/api/auth/register"
                         ).permitAll()
-                        // Add other path patterns as needed
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

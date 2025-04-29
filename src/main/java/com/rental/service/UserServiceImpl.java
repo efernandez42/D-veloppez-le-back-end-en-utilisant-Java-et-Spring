@@ -30,7 +30,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User login(LoginRequest loginRequest) {
-        User user = userRepository.findByEmail(loginRequest.getEmail())
+        User user = userRepository.findByEmail(loginRequest.getLogin())
                 .orElseThrow(() -> new RuntimeException("User not found"));
         if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
             throw new RuntimeException("Invalid credentials");

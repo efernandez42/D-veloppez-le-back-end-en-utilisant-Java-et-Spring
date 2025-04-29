@@ -1,10 +1,16 @@
 package com.rental.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import java.util.Set;
+
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 
 @Entity
 @Table(name = "rentals")
@@ -21,14 +27,22 @@ public class Rental {
     private String picture;
 
     private String description;
+
+    @JsonProperty("owner_id")
     private Long ownerId;
 
-    @CreatedDate
-    @Column(updatable = false)
+    @Column(name = "created_at", updatable = false)
+    @CreationTimestamp
+    @JsonProperty("created_at")
     private LocalDateTime createdAt;
 
-    @LastModifiedDate
+    @Column(name = "updated_at")
+    @UpdateTimestamp
+    @JsonProperty("updated_at")
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "rental")
+    private Set<Message> messages = new HashSet<>();
 
 
     public Rental() {}

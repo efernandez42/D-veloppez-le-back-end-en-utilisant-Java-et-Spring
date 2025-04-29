@@ -1,5 +1,6 @@
 package com.rental.controller;
 
+import com.rental.dto.UserResponseMe;
 import com.rental.model.User;
 import com.rental.service.UserService;
 import com.rental.dto.LoginRequest;
@@ -8,6 +9,8 @@ import com.rental.dto.UserResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -34,8 +37,10 @@ public class UserController {
 
     // Route pour obtenir l'utilisateur connecté
     @GetMapping("/me")
-    public ResponseEntity<UserResponse> me(@RequestHeader("Authorization") String token) {
-        User user = userService.getUserFromToken(token);
-        return ResponseEntity.ok(new UserResponse(user, token));
+    public ResponseEntity<UserResponseMe> me(@RequestHeader("Authorization") String token) {
+        // Supprimer "Bearer " du token
+        String cleanToken = token.replace("Bearer ", "");
+        User user = userService.getUserFromToken(cleanToken);
+        return ResponseEntity.ok(new UserResponseMe(user));
     }
 }
