@@ -50,4 +50,23 @@ public class RentalServiceImpl implements RentalService {
     public Rental saveRental(@RequestBody Rental rental) {
         return rentalRepository.save(rental);
     }
+
+    @Override
+    public Rental updateRental(Long id, Rental updatedRental) {
+        Rental existingRental = getRentalById(id);
+        if (existingRental == null) {
+            throw new RuntimeException("Rental not found with id: " + id);
+        }
+
+        updatedRental.setPicture(existingRental.getPicture());
+
+        existingRental.setName(updatedRental.getName());
+        existingRental.setSurface(updatedRental.getSurface());
+        existingRental.setPrice(updatedRental.getPrice());
+        existingRental.setDescription(updatedRental.getDescription());
+
+        return rentalRepository.save(existingRental);
+    }
+
+
 }

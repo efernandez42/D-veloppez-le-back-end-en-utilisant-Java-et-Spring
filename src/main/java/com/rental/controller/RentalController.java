@@ -45,14 +45,18 @@ public class RentalController {
     public Map<String, String> createRental(@RequestHeader("Authorization") String token, @ModelAttribute RentalRequest rentalRequest) {
         try {
             MultipartFile file = rentalRequest.getPicture();
-            String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+            String fileName = null;
 
-            File uploadDir = new File(UPLOAD_DIR);
-            if (!uploadDir.exists()) {
-                uploadDir.mkdirs();
+            if (file != null && !file.isEmpty()) {
+                fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+
+                File uploadDir = new File(UPLOAD_DIR);
+                if (!uploadDir.exists()) {
+                    uploadDir.mkdirs();
+                }
+
+                file.transferTo(Paths.get(UPLOAD_DIR + fileName));
             }
-
-            file.transferTo(Paths.get(UPLOAD_DIR + fileName));
 
             String cleanToken = token.replace("Bearer ", "");
             User user = userService.getUserFromToken(cleanToken);
@@ -73,11 +77,41 @@ public class RentalController {
             return Map.of("error", ResponseEntity.internalServerError().build().toString()) ;
         }
     }
-}
 
-//
-//    @PostMapping(consumes = "multipart/form-data")
-//    public Rental saveRental(@RequestBody Rental rental) {
-//        return rentalService.saveRental(rental);
-//    }
-//
+    @PutMapping(value = "/{id}", consumes = "multipart/form-data")
+    public Map<String, String> updateRental(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Long id,
+            @ModelAttribute RentalRequest rentalRequest) {
+
+        try {
+            Rental existingRental = rentalServiceImpl.getRentalById(id);
+            if (existingRental == null) {
+                return Map.of("error", "Location non trouvée");
+            }
+
+            String cleanToken = token.replace("Bearer ", "");
+            User user = userService.getUserFromToken(cleanToken);
+
+            if (!existingRental.getOwnerId().equals(user.getId())) {
+                return Map.of("error", "Vous n'êtes pas autorisé à modifier cette location.");
+            }
+
+            existingRental.setName(rentalRequest.getName());
+            existingRental.setSurface(rentalRequest.getSurface());
+            existingRental.setPrice(rentalRequest.getPrice());
+            existingRental.setDescription(rentalRequest.getDescription());
+
+            rentalServiceImpl.updateRental(id, existingRental);
+
+            return Map.of("message", "Location mise à jour avec succès.");
+        } catch (Exception e) {
+            return Map.of("error", "Une erreur est survenue : " + e.getMessage());
+        }
+    }
+
+
+
+
+
+}

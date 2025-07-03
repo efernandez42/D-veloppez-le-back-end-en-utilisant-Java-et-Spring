@@ -9,4 +9,5 @@ public interface RentalService {
     Rental getRentalById(Long id);
     Rental saveRental(Rental rental);
 
+    Rental updateRental(Long id, Rental updatedRental);
 }
