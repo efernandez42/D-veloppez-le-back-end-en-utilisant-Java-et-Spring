@@ -32,7 +32,6 @@ Une API REST complète pour la gestion de locations immobilières, développée 
 
 ### 📸 Gestion des Images
 - **Upload d'images** : Stockage local des photos de locations
-- **Génération d'UUID** : Sécurisation des noms de fichiers
 
 ## 🛠️ Technologies utilisées
 
